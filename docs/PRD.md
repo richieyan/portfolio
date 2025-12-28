@@ -3,16 +3,16 @@
 日期：2025-12-28
 
 ## 核心价值
-以代理为中心的本地投资组合管理 Web 应用：通过 MCP 驱动的 `tushare-mcp` 获取并缓存多年的股票数据到本地数据库（SQLite），并用 DeepSeek 分析 Agent 评估在指定期限达成目标收益率的概率，支持单股与多股批量分析，降低重复拉取成本并提升决策效率。
+以代理为中心的本地投资组合管理 Web 应用：通过 Tushare Python SDK 获取并缓存多年的股票数据到本地数据库（SQLite），并用 DeepSeek 分析 Agent 评估在指定期限达成目标收益率的概率，支持单股与多股批量分析，降低重复拉取成本并提升决策效率。
 
 ## 背景分析
 - 问题：频繁向 Tushare 拉取数据存在限流与等待；分析过程分散、不可复用；本地研究需要稳定可控的数据副本。
-- 机会：MCP 统一协议 + 本地缓存使数据与分析解耦，深度自动化分析可复用；组合视角提升研究与复盘的质量。
+- 机会：Tushare SDK + 本地缓存使数据与分析解耦，深度自动化分析可复用；组合视角提升研究与复盘的质量。
 - 目标：
   - 降低数据获取成本与等待时间，避免重复调用。
   - 提供可解释的收益达成概率评估（单股/批量）。
   - 支撑组合层的建仓、监控与复盘。
-- 技术可行性：`uv tool run tushare-mcp` 已可用；SQLite 适合本地；DeepSeek Agent 用于概率评估与报告生成。
+- 技术可行性：Tushare Python SDK 已可用；SQLite 适合本地；DeepSeek Agent 用于概率评估与报告生成。
 
 ## 用户画像
 - Persona A（个人量化爱好者）：本地研究 A 股，需要快速拉取与缓存数据，批量评估目标收益概率，进行中短期策略回测与持仓监控。
@@ -123,9 +123,9 @@ flowchart TD
   - 如果概率低但价值模型给出“安全边际高”，提示“或可逢低建仓/分批买入”，并建议放宽收益率或拉长期限重算概率。
   - 报告中输出“常识性判断”标签：乐观/中性/保守，并列出触发原因（折现率、分红稳定度、估值分位、周期性波动）。
 
-## 技术架构（本地 Web + MCP）
+## 技术架构（本地 Web + Tushare SDK）
 - 前端：轻量 Web（React/Next.js 或 SvelteKit），组件化，支持进度显示与本地状态。
-- 后端：Python（FastAPI），MCP 客户端调用 `tushare-mcp` 与 DeepSeek Agent；任务调度（`apscheduler` 或后台任务）。
+- 后端：Python（FastAPI），直接调用 Tushare Python SDK 与 DeepSeek Agent；任务调度（`apscheduler` 或后台任务）。
 - 数据库：SQLite（本地文件），ORM（SQLAlchemy）。
 
 ### 数据模型（SQLite 表）
@@ -139,7 +139,7 @@ flowchart TD
 - jobs(id, type, status, progress, started_at, finished_at, logs)
 
 ### 集成
-- Tushare MCP：通过 MCP 客户端发起标准化请求；工具路由到 `uv tool run tushare-mcp` 服务。
+- Tushare SDK：使用官方 Tushare Python SDK（需设置 `TUSHARE_TOKEN`）；封装调用与错误处理。
 - DeepSeek Agent：统一的 Agent 接口（HTTP/SDK），后端封装提示模版与容错重试。
 
 ### 缓存与增量策略
@@ -167,18 +167,14 @@ flowchart TD
 
 ## 配置与运行（草案）
 - 环境变量：`TUSHARE_TOKEN`, `DEEPSEEK_API_KEY`。
-- 启动数据源（已安装）：
-
-```bash
-uv tool run tushare-mcp
-```
+- 数据源：直接使用 Tushare Python SDK（确保安装 `tushare` 并设置 Token）。
 
 - 后端服务栈示例：FastAPI + SQLAlchemy + apscheduler；前端以 Next.js/SvelteKit。
-- 后续：生成后端 API 规范与最小运行骨架（含 SQLite schema、MCP/DeepSeek 调用封装、示例前端页）。
+- 后续：生成后端 API 规范与最小运行骨架（含 SQLite schema、Tushare/DeepSeek 调用封装、示例前端页）。
 
 ## 逻辑与设计理由
 - 本地缓存减少重复拉取与等待，契合研究工作流。
-- MCP 让数据源/Agent 解耦，便于替换与扩展。
+- Tushare SDK + 本地缓存让数据与 Agent 解耦，便于替换与扩展。
 - 概率评估提供可解释的决策指标；多方法交叉提高稳健性。
 - UI 以任务与组合为主线，突出可操作性与结果。
 

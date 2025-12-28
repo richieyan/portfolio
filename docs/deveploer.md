@@ -7,24 +7,23 @@
 1.  **Backend**: FastAPI, SQLAlchemy (Async), Pydantic, Python 3.10+.
 2.  **Frontend**: Next.js 14+ (App Router), TailwindCSS, Shadcn/UI, Recharts.
 3.  **Data & Math**: SQLite 优化, Pandas, NumPy/SciPy (用于 GBM/蒙特卡洛模拟).
-4.  **Agent Integration**: 熟练掌握 MCP (Model Context Protocol) 协议，能够通过 CLI/Stdio 与工具交互，并封装 DeepSeek/OpenAI 兼容接口。
+4.  **Agent Integration**: 熟练掌握 Tushare SDK 数据获取与 DeepSeek/OpenAI 兼容接口编排。
 
 ## Context
 我正在开发一个名为 **"组合管理 Agent (Portfolio Management Agent)"** 的本地 Web 应用。
-这个应用的核心价值是通过 MCP 协议调用本地安装的 `tushare-mcp` 工具来获取 A 股数据，存入本地 SQLite 数据库，并使用 DeepSeek 模型进行投资组合的概率评估。
+这个应用的核心价值是通过 Tushare Python SDK 获取 A 股数据，存入本地 SQLite 数据库，并使用 DeepSeek 模型进行投资组合的概率评估。
 
 ## Goals
-你的任务是根据我提供的 PRD（需求文档），协助我完成 MVP 版本的代码落地。你需要从技术架构设计开始，逐步提供数据库 Schema、MCP 调用封装、核心数学模型实现以及前后端代码。
+你的任务是根据我提供的 PRD（需求文档），协助我完成 MVP 版本的代码落地。你需要从技术架构设计开始，逐步提供数据库 Schema、Tushare SDK 调用封装、核心数学模型实现以及前后端代码。
 
 ## Constraints (关键技术约束)
-1.  **MCP 工具调用 (重要)**:
-    * 数据源 `tushare-mcp` 是通过 `uv tool` 安装的 CLI 工具。
-    * **不要**尝试 `import tushare`。
-    * **必须**通过 Python 的 `subprocess` 或 `asyncio.subprocess` 调用命令行：`uv tool run tushare-mcp call [tool_name] --args '{"key": "value"}'` 来获取数据。
-    * 你需要编写一个健壮的 `TushareMCPService` 类来封装这些 CLI 调用，并处理 JSON 解析和错误重试。
+1.  **Tushare SDK 调用 (重要)**:
+    * 数据源：官方 Tushare Python SDK（`import tushare as ts`）。
+    * **必须**设置 `TUSHARE_TOKEN` 并通过 SDK 直接调用接口；不要使用 MCP CLI。
+    * 需要编写健壮的 `TushareService` 封装，负责参数校验、调用、DataFrame 解析、错误重试与退避。
 
 2.  **本地缓存策略**:
-    * 严格遵循“读优先本地”原则。查询时先查 SQLite，未命中或过期（TTL）再调用 MCP 工具，并回写数据库。
+    * 严格遵循“读优先本地”原则。查询时先查 SQLite，未命中或过期（TTL）再调用 Tushare SDK，并回写数据库。
     * SQLite 数据库文件位于本地路径。
 
 3.  **数学模型准确性**:
@@ -37,8 +36,8 @@
     * 根据 PRD 的“数据模型”章节，设计 `models.py` (SQLAlchemy)。
     * 设计 SQLite 的索引策略以优化时序数据查询。
 
-2.  **Step 2: 核心服务层 (MCP & Math)**
-    * 实现 `TushareMCPService`（封装 CLI 调用）。
+2.  **Step 2: 核心服务层 (Tushare SDK & Math)**
+    * 实现 `TushareService`（封装 SDK 调用）。
     * 实现 `AnalysisEngine`（包含 GBM 概率计算、DCF 估值的 Python 函数）。
 
 3.  **Step 3: Agent 编排层**
