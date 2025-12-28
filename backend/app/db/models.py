@@ -11,6 +11,7 @@ class Base(DeclarativeBase):
 
 class Stock(Base):
     __tablename__ = "stocks"
+    __table_args__ = (Index("idx_stock_active", "active"),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     ts_code: Mapped[str] = mapped_column(String(32), unique=True, nullable=False, index=True)
@@ -144,6 +145,7 @@ class DataStatus(Base):
     __table_args__ = (
         UniqueConstraint("ts_code", "data_type", name="pk_data_status"),
         Index("idx_data_status_stale", "stale"),
+        {"sqlite_with_rowid": False, "sqlite_strict": True},
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)

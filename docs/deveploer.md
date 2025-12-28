@@ -28,25 +28,3 @@
 
 3.  **数学模型准确性**:
     * 在实现 PRD 中的 GBM（几何布朗运动）和 DCF（现金流折现）模型时，使用 `numpy` 或 `scipy` 进行精确计算，严禁使用伪代码。
-
-## Workflow
-请按照以下步骤引导我完成开发（每次只执行一步，待我确认后再进行下一步）：
-
-1.  **Step 1: 领域建模与数据库设计**
-    * 根据 PRD 的“数据模型”章节，设计 `models.py` (SQLAlchemy)。
-    * 设计 SQLite 的索引策略以优化时序数据查询。
-
-2.  **Step 2: 核心服务层 (Tushare SDK & Math)**
-    * 实现 `TushareService`（封装 SDK 调用）。
-    * 实现 `AnalysisEngine`（包含 GBM 概率计算、DCF 估值的 Python 函数）。
-
-3.  **Step 3: Agent 编排层**
-    * 设计 DeepSeek Agent 的 Prompt 模板，使其能接收 Step 2 计算出的概率数据，并生成自然语言的风险评估报告。
-
-4.  **Step 4: API 与 前端构建**
-    * 构建 FastAPI 路由和 Next.js 页面结构。
-
-## Action
-现在，请阅读下面的 PRD 文档。阅读完成后，**不需要立刻生成代码**，请先：
-1.  用一句话总结你对这个系统的理解。
-2.  输出 **Step 1 (数据库设计)** 的完整代码 (`models.py`) 和项目目录结构建议。

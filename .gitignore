@@ -5,7 +5,9 @@ __pycache__/
 *.sqlite
 *.db
 .venv/
+.uv/
 .env
 .data/
 data/*.db
 .DS_Store
+uv.lock

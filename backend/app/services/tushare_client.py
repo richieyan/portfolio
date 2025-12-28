@@ -147,3 +147,161 @@ class TushareService:
             .limit(limit)
         )
         return list(result.scalars().all())
+
+    async def fetch_financials(self, ts_code: str) -> list[models.Financial]:
+        """Cache-first fetch of financial indicators for a single symbol.
+
+        Uses Tushare `fina_indicator` to populate ROE, ROA, and debt ratio.
+        Revenue and profit are optional and may be unavailable from this endpoint.
+        """
+        ttl = self.settings.financial_ttl_seconds
+        data_type = "financials"
+        if not await self._is_stale(ts_code, data_type, ttl_seconds=ttl):
+            result = await self.session.execute(
+                select(models.Financial)
+                .where(models.Financial.ts_code == ts_code)
+                .order_by(models.Financial.period.desc())
+            )
+            return list(result.scalars().all())
+
+        df = await self._run_with_retry(self.api.fina_indicator, ts_code=ts_code)
+        records = self._normalize_financials(df)
+        await self._upsert_financials(records)
+        await self._mark_status(ts_code, data_type, ttl_seconds=ttl, stale=False)
+        await self.session.commit()
+
+        result = await self.session.execute(
+            select(models.Financial)
+            .where(models.Financial.ts_code == ts_code)
+            .order_by(models.Financial.period.desc())
+        )
+        return list(result.scalars().all())
+
+    def _normalize_financials(self, df: pd.DataFrame) -> Iterable[dict]:
+        if df is None or df.empty:
+            return []
+        df = df.copy()
+        # Period: use end_date from fina_indicator (YYYYMMDD string)
+        df["period"] = df["end_date"].astype(str)
+        # Map fields safely if present
+        cols = [
+            "ts_code",
+            "period",
+            "roe",
+            "roa",
+            "debt_to_assets",
+        ]
+        # Fill missing columns with NaN for robustness
+        for c in cols:
+            if c not in df.columns:
+                df[c] = pd.NA
+        for _, row in df[cols].iterrows():
+            yield {
+                "ts_code": row["ts_code"],
+                "period": row["period"],
+                "revenue": None,
+                "profit": None,
+                "roe": float(row["roe"]) if pd.notna(row["roe"]) else None,
+                "roa": float(row["roa"]) if pd.notna(row["roa"]) else None,
+                "debt_ratio": float(row["debt_to_assets"]) if pd.notna(row["debt_to_assets"]) else None,
+            }
+
+    async def _upsert_financials(self, records: Iterable[dict]) -> None:
+        records_list = list(records)
+        if not records_list:
+            return
+        stmt = insert(models.Financial).values(records_list)
+        stmt = stmt.on_conflict_do_update(
+            index_elements=[models.Financial.ts_code, models.Financial.period],
+            set_={
+                "revenue": stmt.excluded.revenue,
+                "profit": stmt.excluded.profit,
+                "roe": stmt.excluded.roe,
+                "roa": stmt.excluded.roa,
+                "debt_ratio": stmt.excluded.debt_ratio,
+            },
+        )
+        await self.session.execute(stmt)
+
+    async def list_financials(self, ts_code: str, limit: int = 40) -> list[models.Financial]:
+        result = await self.session.execute(
+            select(models.Financial)
+            .where(models.Financial.ts_code == ts_code)
+            .order_by(models.Financial.period.desc())
+            .limit(limit)
+        )
+        return list(result.scalars().all())
+
+    async def fetch_valuations(self, ts_code: str) -> list[models.Valuation]:
+        """Cache-first fetch of valuation snapshots for a single symbol.
+
+        Uses Tushare `daily_basic` to populate PE, PB, and PS. EV/EBITDA
+        is optional and left as None in MVP.
+        """
+        ttl = self.settings.valuation_ttl_seconds
+        data_type = "valuations"
+        if not await self._is_stale(ts_code, data_type, ttl_seconds=ttl):
+            result = await self.session.execute(
+                select(models.Valuation)
+                .where(models.Valuation.ts_code == ts_code)
+                .order_by(models.Valuation.date.desc())
+            )
+            return list(result.scalars().all())
+
+        df = await self._run_with_retry(self.api.daily_basic, ts_code=ts_code)
+        records = self._normalize_valuations(df)
+        await self._upsert_valuations(records)
+        await self._mark_status(ts_code, data_type, ttl_seconds=ttl, stale=False)
+        await self.session.commit()
+
+        result = await self.session.execute(
+            select(models.Valuation)
+            .where(models.Valuation.ts_code == ts_code)
+            .order_by(models.Valuation.date.desc())
+        )
+        return list(result.scalars().all())
+
+    def _normalize_valuations(self, df: pd.DataFrame) -> Iterable[dict]:
+        if df is None or df.empty:
+            return []
+        df = df.copy()
+        df["date"] = pd.to_datetime(df["trade_date"], format="%Y%m%d").dt.date
+        # Ensure columns exist
+        for c in ["pe_ttm", "pb", "ps_ttm"]:
+            if c not in df.columns:
+                df[c] = pd.NA
+        cols = ["ts_code", "date", "pe_ttm", "pb", "ps_ttm"]
+        for _, row in df[cols].iterrows():
+            yield {
+                "ts_code": row["ts_code"],
+                "date": row["date"],
+                "pe": float(row["pe_ttm"]) if pd.notna(row["pe_ttm"]) else None,
+                "pb": float(row["pb"]) if pd.notna(row["pb"]) else None,
+                "ps": float(row["ps_ttm"]) if pd.notna(row["ps_ttm"]) else None,
+                "ev_ebitda": None,
+            }
+
+    async def _upsert_valuations(self, records: Iterable[dict]) -> None:
+        records_list = list(records)
+        if not records_list:
+            return
+        stmt = insert(models.Valuation).values(records_list)
+        stmt = stmt.on_conflict_do_update(
+            index_elements=[models.Valuation.ts_code, models.Valuation.date],
+            set_={
+                "pe": stmt.excluded.pe,
+                "pb": stmt.excluded.pb,
+                "ps": stmt.excluded.ps,
+                "ev_ebitda": stmt.excluded.ev_ebitda,
+            },
+        )
+        await self.session.execute(stmt)
+
+    async def list_valuations(self, ts_code: str, limit: int = 60) -> list[models.Valuation]:
+        result = await self.session.execute(
+            select(models.Valuation)
+            .where(models.Valuation.ts_code == ts_code)
+            .order_by(models.Valuation.date.desc())
+            .limit(limit)
+        )
+        return list(result.scalars().all())

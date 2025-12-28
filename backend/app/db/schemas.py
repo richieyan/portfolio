@@ -34,6 +34,31 @@ class PriceHistoryRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class FinancialRead(BaseModel):
+    id: int
+    ts_code: str
+    period: str
+    revenue: Optional[float]
+    profit: Optional[float]
+    roe: Optional[float]
+    roa: Optional[float]
+    debt_ratio: Optional[float]
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ValuationRead(BaseModel):
+    id: int
+    ts_code: str
+    date: date
+    pe: Optional[float]
+    pb: Optional[float]
+    ps: Optional[float]
+    ev_ebitda: Optional[float]
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class PortfolioCreate(BaseModel):
     name: str
 
@@ -72,6 +97,17 @@ class AnalysisRead(BaseModel):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class AnalysisCreate(BaseModel):
+    ts_code: Optional[str]
+    target_return: float
+    horizon_years: float
+    method: str = "gbm"
+
+
+class RefreshRequest(BaseModel):
+    ts_codes: list[str]
 
 
 class JobRead(BaseModel):
