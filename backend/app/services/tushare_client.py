@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from typing import Iterable
 
 import pandas as pd
@@ -20,6 +20,15 @@ class TushareService:
         self.session = session
         ts.set_token(self.settings.tushare_token)
         self.api = ts.pro_api()
+
+    async def _ensure_stock(self, ts_code: str) -> None:
+        """Guarantee a stock row exists to satisfy FK constraints."""
+        result = await self.session.execute(select(models.Stock).where(models.Stock.ts_code == ts_code))
+        if result.scalar_one_or_none():
+            return
+        stock = models.Stock(ts_code=ts_code, active=True)
+        self.session.add(stock)
+        await self.session.flush()
 
     async def _get_status(self, ts_code: str, data_type: str) -> models.DataStatus | None:
         result = await self.session.execute(
@@ -72,6 +81,7 @@ class TushareService:
     ) -> list[models.PriceHistory]:
         """Cache-first fetch of daily OHLCV for a single symbol."""
         ttl = self.settings.price_ttl_seconds
+        await self._ensure_stock(ts_code)
         if not await self._is_stale(ts_code, "price_history", ttl_seconds=ttl):
             existing = await self.session.execute(
                 select(models.PriceHistory)
@@ -80,7 +90,14 @@ class TushareService:
             )
             return list(existing.scalars().all())
 
-        df = await self._run_with_retry(self.api.daily, ts_code=ts_code, start_date=start_date, end_date=end_date)
+        last_date = await self._get_last_trade_date(ts_code)
+        incremental_start = start_date or self._next_date_str(last_date)
+        df = await self._run_with_retry(
+            self.api.daily,
+            ts_code=ts_code,
+            start_date=incremental_start,
+            end_date=end_date,
+        )
         records = self._normalize_prices(df)
         await self._upsert_prices(records)
         await self._mark_status(ts_code, "price_history", ttl_seconds=ttl, stale=False)
@@ -92,6 +109,20 @@ class TushareService:
             .order_by(models.PriceHistory.trade_date.desc())
         )
         return list(result.scalars().all())
+
+    async def _get_last_trade_date(self, ts_code: str) -> date | None:
+        result = await self.session.execute(
+            select(models.PriceHistory.trade_date)
+            .where(models.PriceHistory.ts_code == ts_code)
+            .order_by(models.PriceHistory.trade_date.desc())
+            .limit(1)
+        )
+        return result.scalar_one_or_none()
+
+    def _next_date_str(self, last_date: date | None) -> str | None:
+        if not last_date:
+            return None
+        return (last_date + timedelta(days=1)).strftime("%Y%m%d")
 
     async def _run_with_retry(self, func, max_attempts: int = 3, **kwargs):
         delay = 1.0
@@ -126,7 +157,10 @@ class TushareService:
             }
 
     async def _upsert_prices(self, records: Iterable[dict]) -> None:
-        stmt = insert(models.PriceHistory).values(list(records))
+        records_list = list(records)
+        if not records_list:
+            return
+        stmt = insert(models.PriceHistory).values(records_list)
         stmt = stmt.on_conflict_do_update(
             index_elements=[models.PriceHistory.ts_code, models.PriceHistory.trade_date],
             set_={
@@ -156,6 +190,7 @@ class TushareService:
         """
         ttl = self.settings.financial_ttl_seconds
         data_type = "financials"
+        await self._ensure_stock(ts_code)
         if not await self._is_stale(ts_code, data_type, ttl_seconds=ttl):
             result = await self.session.execute(
                 select(models.Financial)
@@ -240,6 +275,7 @@ class TushareService:
         """
         ttl = self.settings.valuation_ttl_seconds
         data_type = "valuations"
+        await self._ensure_stock(ts_code)
         if not await self._is_stale(ts_code, data_type, ttl_seconds=ttl):
             result = await self.session.execute(
                 select(models.Valuation)

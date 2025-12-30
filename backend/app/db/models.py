@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from typing import Optional
 
-from sqlalchemy import Boolean, Date, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint, Index, JSON
+from sqlalchemy import Boolean, Date, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint, Index, JSON, PrimaryKeyConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -143,14 +143,13 @@ class Job(Base):
 class DataStatus(Base):
     __tablename__ = "data_status"
     __table_args__ = (
-        UniqueConstraint("ts_code", "data_type", name="pk_data_status"),
+        PrimaryKeyConstraint("ts_code", "data_type", name="pk_data_status"),
         Index("idx_data_status_stale", "stale"),
         {"sqlite_with_rowid": False, "sqlite_strict": True},
     )
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    ts_code: Mapped[str] = mapped_column(String(32), nullable=False)
-    data_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    ts_code: Mapped[str] = mapped_column(String(32), primary_key=True, nullable=False)
+    data_type: Mapped[str] = mapped_column(String(32), primary_key=True, nullable=False)
     last_updated: Mapped[Optional[datetime]] = mapped_column(DateTime)
     ttl_seconds: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     stale: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)

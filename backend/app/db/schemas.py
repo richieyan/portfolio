@@ -86,6 +86,13 @@ class HoldingRead(HoldingCreate):
     model_config = ConfigDict(from_attributes=True)
 
 
+class HoldingUpdate(BaseModel):
+    qty: Optional[int] = None
+    buy_price: Optional[float] = None
+    buy_date: Optional[date] = None
+    tags: Optional[str] = None
+
+
 class AnalysisRead(BaseModel):
     id: int
     ts_code: Optional[str]
