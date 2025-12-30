@@ -82,6 +82,7 @@ Purpose: Align contributions with the PRD and enforce local-first, Tushare-drive
 - Update docs when schema/service contracts change.
 - Write targeted tests around changed code; expand scope after confidence.
 - Avoid adding license headers unless requested.
+- Git commits: use Conventional Commits style prefixes (e.g., `feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `test:`, `build:`, `ci:`, `perf:`, `revert:`); keep messages concise and present-tense.
 
 ## References
 - Product spec: [docs/PRD.md](docs/PRD.md)
