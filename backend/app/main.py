@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from backend.app.config import get_settings
 from backend.app.db import models
@@ -7,6 +8,14 @@ from backend.app.api import analyses, financials, holdings, jobs, portfolios, pr
 
 
 app = FastAPI(title=get_settings().app_name)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["*"]
+)
 
 
 @app.on_event("startup")

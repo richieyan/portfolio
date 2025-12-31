@@ -12,8 +12,18 @@ Purpose: Align contributions with the PRD and enforce local-first, Tushare-drive
 ## Environment
 - Backend: Python 3.10+, FastAPI, SQLAlchemy (Async), Pydantic.
 - Frontend: Next.js 14+ (App Router), TailwindCSS, shadcn/ui, Recharts.
+- Frontend scaffolding: pnpm available; prefer `pnpm create next-app@latest my-next-app`.
 - Data/Math: SQLite, Pandas, NumPy/SciPy.
 - Env vars: `TUSHARE_TOKEN`, `DEEPSEEK_API_KEY`.
+
+### Frontend Create-Next Defaults
+- TypeScript: Yes (required for type safety).
+- ESLint: Yes.
+- Tailwind CSS: Yes (track v4 when available).
+- src/ directory: Yes.
+- App Router: Yes.
+- Turbopack: Yes (if prompted).
+- Import alias: Yes, use `@/*`.
 
 ## Tushare Usage (Required)
 - Use the official `tushare` Python SDK (`import tushare as ts`) and set `ts.set_token(TUSHARE_TOKEN)`.
