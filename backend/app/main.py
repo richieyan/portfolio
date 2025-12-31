@@ -1,11 +1,17 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import logging
 
 from backend.app.config import get_settings
 from backend.app.db import models
 from backend.app.db.session import engine
-from backend.app.api import analyses, financials, holdings, jobs, portfolios, prices, valuations
+from backend.app.api import analyses, financials, holdings, jobs, portfolios, prices, stocks, valuations
 
+# 配置基础日志
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 
 app = FastAPI(title=get_settings().app_name)
 
@@ -35,3 +41,4 @@ app.include_router(analyses.router)
 app.include_router(jobs.router)
 app.include_router(portfolios.router)
 app.include_router(holdings.router)
+app.include_router(stocks.router)

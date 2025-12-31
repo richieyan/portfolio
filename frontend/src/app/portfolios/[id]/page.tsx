@@ -80,29 +80,45 @@ export default function PortfolioPage() {
             刷新
           </Button>
         </CardHeader>
-        <div className="grid gap-3 sm:grid-cols-4">
-          <Input
-            placeholder="ts_code"
-            value={form.ts_code}
-            onChange={(e) => setForm({ ...form, ts_code: e.target.value })}
-          />
-          <Input
-            type="number"
-            placeholder="qty"
-            value={form.qty}
-            onChange={(e) => setForm({ ...form, qty: e.target.value })}
-          />
-          <Input
-            type="number"
-            placeholder="buy price"
-            value={form.buy_price}
-            onChange={(e) => setForm({ ...form, buy_price: e.target.value })}
-          />
-          <Input
-            type="date"
-            value={form.buy_date}
-            onChange={(e) => setForm({ ...form, buy_date: e.target.value })}
-          />
+        <div className="space-y-3">
+          <div>
+            <label className="text-xs font-semibold text-slate-800">ts_code <span className="text-red-600">*</span></label>
+            <p className="mb-2 text-xs text-slate-600">A股深交所如 000001.SZ、上交所如 600000.SH、港股如 00700.HK</p>
+            <Input
+              placeholder="例：000001.SZ"
+              value={form.ts_code}
+              onChange={(e) => setForm({ ...form, ts_code: e.target.value })}
+            />
+          </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div>
+              <label className="text-xs font-semibold text-slate-800">数量 <span className="text-red-600">*</span></label>
+              <Input
+                type="number"
+                placeholder="例：100"
+                value={form.qty}
+                onChange={(e) => setForm({ ...form, qty: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-slate-800">买入价 <span className="text-red-600">*</span></label>
+              <Input
+                type="number"
+                step="0.01"
+                placeholder="例：10.50"
+                value={form.buy_price}
+                onChange={(e) => setForm({ ...form, buy_price: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-slate-800">买入日期（可选）</label>
+              <Input
+                type="date"
+                value={form.buy_date}
+                onChange={(e) => setForm({ ...form, buy_date: e.target.value })}
+              />
+            </div>
+          </div>
         </div>
         <div className="mt-3 flex items-center gap-3 text-sm text-slate-700">
           <Button onClick={handleAdd} disabled={loading}>

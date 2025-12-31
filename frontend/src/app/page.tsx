@@ -116,6 +116,9 @@ export default function Home() {
             </div>
           </CardHeader>
           <div className="flex flex-col gap-2 text-sm font-medium text-slate-800">
+            <Link className="underline" href="/stocks">
+              股票列表
+            </Link>
             <Link className="underline" href="/console">
               数据控制台（获取/刷新）
             </Link>

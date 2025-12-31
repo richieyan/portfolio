@@ -155,3 +155,56 @@ class DataStatus(Base):
     stale: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     error_code: Mapped[Optional[str]] = mapped_column(String(64))
     error_msg: Mapped[Optional[str]] = mapped_column(String(256))
+
+
+class IncomeStatement(Base):
+    __tablename__ = "income_statements"
+    __table_args__ = (
+        UniqueConstraint("ts_code", "period", name="uix_income_ts_period"),
+        Index("idx_income_ts_period", "ts_code", "period"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    ts_code: Mapped[str] = mapped_column(String(32), ForeignKey("stocks.ts_code"), nullable=False)
+    period: Mapped[str] = mapped_column(String(32), nullable=False)
+    revenue: Mapped[Optional[float]] = mapped_column(Float)
+    operating_profit: Mapped[Optional[float]] = mapped_column(Float)
+    total_profit: Mapped[Optional[float]] = mapped_column(Float)
+    net_profit: Mapped[Optional[float]] = mapped_column(Float)
+    basic_eps: Mapped[Optional[float]] = mapped_column(Float)
+    diluted_eps: Mapped[Optional[float]] = mapped_column(Float)
+
+
+class BalanceSheet(Base):
+    __tablename__ = "balance_sheets"
+    __table_args__ = (
+        UniqueConstraint("ts_code", "period", name="uix_balance_ts_period"),
+        Index("idx_balance_ts_period", "ts_code", "period"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    ts_code: Mapped[str] = mapped_column(String(32), ForeignKey("stocks.ts_code"), nullable=False)
+    period: Mapped[str] = mapped_column(String(32), nullable=False)
+    total_assets: Mapped[Optional[float]] = mapped_column(Float)
+    total_liab: Mapped[Optional[float]] = mapped_column(Float)
+    total_equity: Mapped[Optional[float]] = mapped_column(Float)
+    fixed_assets: Mapped[Optional[float]] = mapped_column(Float)
+    current_assets: Mapped[Optional[float]] = mapped_column(Float)
+    current_liab: Mapped[Optional[float]] = mapped_column(Float)
+
+
+class CashFlowStatement(Base):
+    __tablename__ = "cash_flow_statements"
+    __table_args__ = (
+        UniqueConstraint("ts_code", "period", name="uix_cashflow_ts_period"),
+        Index("idx_cashflow_ts_period", "ts_code", "period"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    ts_code: Mapped[str] = mapped_column(String(32), ForeignKey("stocks.ts_code"), nullable=False)
+    period: Mapped[str] = mapped_column(String(32), nullable=False)
+    net_profit: Mapped[Optional[float]] = mapped_column(Float)
+    oper_cash_flow: Mapped[Optional[float]] = mapped_column(Float)
+    inv_cash_flow: Mapped[Optional[float]] = mapped_column(Float)
+    fin_cash_flow: Mapped[Optional[float]] = mapped_column(Float)
+    free_cash_flow: Mapped[Optional[float]] = mapped_column(Float)

@@ -1,4 +1,18 @@
-import { Analysis, Financial, Holding, JobStatus, Portfolio, PriceHistory, Valuation } from "./types";
+import {
+  Analysis,
+  BalanceSheet,
+  CashFlowStatement,
+  Financial,
+  Holding,
+  IncomeStatement,
+  JobStatus,
+  Portfolio,
+  PriceHistory,
+  Stock,
+  StockDetailResponse,
+  StockListResponse,
+  Valuation,
+} from "./types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000";
 
@@ -105,4 +119,28 @@ export async function updateHolding(holdingId: number, payload: Partial<Omit<Hol
 
 export async function deleteHolding(holdingId: number): Promise<void> {
   await request(`/api/v1/holdings/${holdingId}`, { method: "DELETE" });
+}
+
+export async function listStocks(search?: string, limit = 100, offset = 0): Promise<StockListResponse> {
+  const params = new URLSearchParams();
+  if (search) params.append("search", search);
+  params.append("limit", limit.toString());
+  params.append("offset", offset.toString());
+  return request<StockListResponse>(`/api/v1/stocks?${params.toString()}`);
+}
+
+export async function getStockDetail(tsCode: string): Promise<StockDetailResponse> {
+  return request<StockDetailResponse>(`/api/v1/stocks/${encodeURIComponent(tsCode)}/detail`);
+}
+
+export async function fetchIncomeStatement(tsCode: string): Promise<IncomeStatement[]> {
+  return request<IncomeStatement[]>(`/api/v1/financials/${encodeURIComponent(tsCode)}/income`);
+}
+
+export async function fetchBalanceSheet(tsCode: string): Promise<BalanceSheet[]> {
+  return request<BalanceSheet[]>(`/api/v1/financials/${encodeURIComponent(tsCode)}/balance`);
+}
+
+export async function fetchCashFlow(tsCode: string): Promise<CashFlowStatement[]> {
+  return request<CashFlowStatement[]>(`/api/v1/financials/${encodeURIComponent(tsCode)}/cashflow`);
 }

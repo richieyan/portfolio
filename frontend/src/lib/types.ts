@@ -66,3 +66,61 @@ export interface JobStatus {
   status: string;
   symbols?: string[];
 }
+
+export interface Stock {
+  id: number;
+  ts_code: string;
+  name?: string | null;
+  sector?: string | null;
+  active: boolean;
+}
+
+export interface StockListResponse {
+  stocks: Stock[];
+  total: number;
+}
+
+export interface IncomeStatement {
+  id: number;
+  ts_code: string;
+  period: string;
+  revenue?: number | null;
+  operating_profit?: number | null;
+  total_profit?: number | null;
+  net_profit?: number | null;
+  basic_eps?: number | null;
+  diluted_eps?: number | null;
+}
+
+export interface BalanceSheet {
+  id: number;
+  ts_code: string;
+  period: string;
+  total_assets?: number | null;
+  total_liab?: number | null;
+  total_equity?: number | null;
+  fixed_assets?: number | null;
+  current_assets?: number | null;
+  current_liab?: number | null;
+}
+
+export interface CashFlowStatement {
+  id: number;
+  ts_code: string;
+  period: string;
+  net_profit?: number | null;
+  oper_cash_flow?: number | null;
+  inv_cash_flow?: number | null;
+  fin_cash_flow?: number | null;
+  free_cash_flow?: number | null;
+}
+
+export interface StockDetailResponse {
+  stock: Stock;
+  latest_price?: PriceHistory | null;
+  latest_valuation?: Valuation | null;
+  latest_financial?: Financial | null;
+  income_statements: IncomeStatement[];
+  balance_sheets: BalanceSheet[];
+  cash_flow_statements: CashFlowStatement[];
+}
