@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Portfolio Console",
-  description: "Local-first portfolio console with Tushare backend",
+  title: "组合控制台",
+  description: "本地优先的投资组合控制台（Tushare 后端）",
 };
 
 export default function RootLayout({
@@ -32,17 +32,17 @@ export default function RootLayout({
           <header className="border-b border-slate-200 bg-white/80 backdrop-blur">
             <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4">
               <Link href="/" className="font-semibold text-slate-900">
-                Portfolio Console
+                组合控制台
               </Link>
               <nav className="flex items-center gap-4 text-sm font-medium text-slate-600">
                 <Link href="/console" className="hover:text-slate-900">
-                  Data Console
+                  数据控制台
                 </Link>
                 <Link href="/stocks/demo" className="hover:text-slate-900">
-                  Stock Analysis
+                  个股分析
                 </Link>
                 <Link href="/portfolios/1" className="hover:text-slate-900">
-                  Portfolio
+                  组合面板
                 </Link>
               </nav>
             </div>

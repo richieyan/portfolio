@@ -8,6 +8,7 @@ Purpose: Align contributions with the PRD and enforce local-first, Tushare-drive
 - Accurate math: implement GBM/DCF using NumPy/SciPy; avoid pseudocode.
 - Minimal changes: fix root causes, avoid unrelated edits, preserve existing style.
 - Async-first backend: prefer SQLAlchemy Async + FastAPI.
+- Language: 前端文案优先使用简体中文；与用户沟通默认使用中文。
 
 ## Environment
 - Backend: Python 3.10+, FastAPI, SQLAlchemy (Async), Pydantic.

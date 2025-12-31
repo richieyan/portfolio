@@ -97,13 +97,13 @@ export default function DataConsolePage() {
       <Card>
         <CardHeader>
           <div>
-            <CardTitle>Data Console</CardTitle>
-            <CardDescription>Fetch or refresh cached data per ts_code.</CardDescription>
+            <CardTitle>数据控制台</CardTitle>
+            <CardDescription>按 ts_code 获取或刷新缓存数据。</CardDescription>
           </div>
         </CardHeader>
         <div className="grid gap-3 sm:grid-cols-[1fr_200px_200px]">
           <Input
-            placeholder="ts_code (e.g. 000001.SZ)"
+            placeholder="ts_code（如 000001.SZ）"
             value={tsCode}
             onChange={(e) => setTsCode(e.target.value)}
           />
@@ -120,30 +120,30 @@ export default function DataConsolePage() {
           </select>
           <div className="flex gap-2">
             <Button onClick={handleFetch} disabled={loading} variant="secondary">
-              Fetch
+              获取
             </Button>
             <Button onClick={handleRefresh} disabled={loading}>
-              Refresh
+              刷新
             </Button>
           </div>
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-slate-700">
           <Button variant="ghost" className="px-2" onClick={handleJob} disabled={loading}>
-            Enqueue Background Refresh
+            后台刷新队列
           </Button>
           {jobStatus && <Badge variant="info">{jobStatus}</Badge>}
           {error && <span className="text-red-600">{error}</span>}
-          {loading && <span>Loading...</span>}
+          {loading && <span>加载中...</span>}
         </div>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Results</CardTitle>
-          <CardDescription>Latest response data.</CardDescription>
+          <CardTitle>结果</CardTitle>
+          <CardDescription>最新响应数据。</CardDescription>
         </CardHeader>
         {rows.length === 0 && !loading ? (
-          <EmptyState>No data yet. Fetch to view results.</EmptyState>
+          <EmptyState>暂无数据，先点击获取。</EmptyState>
         ) : (
           <Table>
             <THead>

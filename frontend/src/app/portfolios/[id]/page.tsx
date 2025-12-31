@@ -73,11 +73,11 @@ export default function PortfolioPage() {
       <Card>
         <CardHeader>
           <div>
-            <CardTitle>Portfolio #{portfolioId}</CardTitle>
-            <CardDescription>View and manage holdings.</CardDescription>
+            <CardTitle>组合 #{portfolioId}</CardTitle>
+            <CardDescription>查看并管理持仓。</CardDescription>
           </div>
           <Button onClick={load} disabled={loading} variant="secondary">
-            Refresh
+            刷新
           </Button>
         </CardHeader>
         <div className="grid gap-3 sm:grid-cols-4">
@@ -106,29 +106,29 @@ export default function PortfolioPage() {
         </div>
         <div className="mt-3 flex items-center gap-3 text-sm text-slate-700">
           <Button onClick={handleAdd} disabled={loading}>
-            Add holding
+            添加持仓
           </Button>
-          {loading && <span>Working...</span>}
+          {loading && <span>处理中...</span>}
           {error && <span className="text-red-600">{error}</span>}
         </div>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Holdings</CardTitle>
-          <CardDescription>Current holdings for this portfolio.</CardDescription>
+          <CardTitle>持仓列表</CardTitle>
+          <CardDescription>当前组合的持仓。</CardDescription>
         </CardHeader>
         {holdings.length === 0 ? (
-          <EmptyState>No holdings yet.</EmptyState>
+          <EmptyState>暂无持仓。</EmptyState>
         ) : (
           <Table>
             <THead>
               <TR>
                 <TH>ts_code</TH>
-                <TH>Qty</TH>
-                <TH>Buy Price</TH>
-                <TH>Buy Date</TH>
-                <TH>Tags</TH>
+                <TH>数量</TH>
+                <TH>买入价</TH>
+                <TH>买入日期</TH>
+                <TH>标签</TH>
                 <TH></TH>
               </TR>
             </THead>
@@ -142,7 +142,7 @@ export default function PortfolioPage() {
                   <TD>{h.tags || "-"}</TD>
                   <TD>
                     <Button variant="ghost" className="px-2 text-red-600" onClick={() => handleDelete(h.id)}>
-                      Delete
+                      删除
                     </Button>
                   </TD>
                 </TR>

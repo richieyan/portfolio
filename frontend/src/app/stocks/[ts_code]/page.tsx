@@ -98,18 +98,18 @@ export default function StockAnalysisPage() {
       <Card>
         <CardHeader>
           <div>
-            <CardTitle>Stock Analysis</CardTitle>
+            <CardTitle>个股分析</CardTitle>
             <CardDescription>{tsCode}</CardDescription>
           </div>
           <div className="flex gap-2">
             <Button onClick={handleRefresh} disabled={loading}>
-              Refresh data
+              刷新数据
             </Button>
           </div>
         </CardHeader>
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-800">Target Return (decimal)</label>
+            <label className="text-sm font-medium text-slate-800">目标收益（小数）</label>
             <Input
               type="number"
               step="0.01"
@@ -118,7 +118,7 @@ export default function StockAnalysisPage() {
             />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-800">Horizon (years)</label>
+            <label className="text-sm font-medium text-slate-800">期限（年）</label>
             <Input
               type="number"
               step="0.25"
@@ -129,9 +129,9 @@ export default function StockAnalysisPage() {
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-slate-700">
           <Button onClick={handleAnalyze} disabled={loading}>
-            Run GBM analysis
+            运行 GBM 分析
           </Button>
-          {loading && <span>Running...</span>}
+          {loading && <span>计算中...</span>}
           {error && <span className="text-red-600">{error}</span>}
           {analysis?.probability !== undefined && analysis?.probability !== null && (
             <Badge variant="success">P={analysis.probability.toFixed(4)}</Badge>
@@ -141,11 +141,11 @@ export default function StockAnalysisPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Price History</CardTitle>
-          <CardDescription>Close price chart (sorted by date).</CardDescription>
+          <CardTitle>价格走势</CardTitle>
+          <CardDescription>收盘价曲线（按日期排序）。</CardDescription>
         </CardHeader>
         {chartData.length === 0 ? (
-          <EmptyState>No price data yet.</EmptyState>
+          <EmptyState>暂无价格数据。</EmptyState>
         ) : (
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
@@ -163,11 +163,11 @@ export default function StockAnalysisPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Valuations</CardTitle>
-          <CardDescription>Latest valuation snapshots.</CardDescription>
+          <CardTitle>估值</CardTitle>
+          <CardDescription>最新估值快照。</CardDescription>
         </CardHeader>
         {valuations.length === 0 ? (
-          <EmptyState>No valuations.</EmptyState>
+          <EmptyState>暂无估值数据。</EmptyState>
         ) : (
           <Table>
             <THead>
@@ -196,8 +196,8 @@ export default function StockAnalysisPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Analysis Result</CardTitle>
-          <CardDescription>Probability and model parameters with DeepSeek report.</CardDescription>
+          <CardTitle>分析结果</CardTitle>
+          <CardDescription>概率、参数与 DeepSeek 报告。</CardDescription>
         </CardHeader>
         {analysis ? (
           <div className="space-y-3 text-sm text-slate-800">
@@ -208,12 +208,12 @@ export default function StockAnalysisPage() {
               <Badge variant="default">n_returns: {analysis.params_json?.n_returns ?? 0}</Badge>
             </div>
             <div>
-              <p className="mb-2 text-sm font-semibold text-slate-900">DeepSeek Report</p>
-              <Textarea readOnly value={analysis.params_json?.report || ""} placeholder="Report not available" />
+              <p className="mb-2 text-sm font-semibold text-slate-900">DeepSeek 报告</p>
+              <Textarea readOnly value={analysis.params_json?.report || ""} placeholder="暂无报告" />
             </div>
           </div>
         ) : (
-          <EmptyState>Run analysis to see results.</EmptyState>
+          <EmptyState>运行分析后查看结果。</EmptyState>
         )}
       </Card>
     </div>
